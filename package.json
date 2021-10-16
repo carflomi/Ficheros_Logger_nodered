@@ -2,7 +2,11 @@
     "name": "Ficheros_Logger_nodered",
     "description": "A Node-RED Project",
     "version": "0.0.1",
-    "dependencies": {},
+    "dependencies": {
+        "node-red-contrib-fs": "1.4.1",
+        "node-red-dashboard": "2.30.0",
+        "node-red-node-ui-table": "0.3.11"
+    },
     "node-red": {
         "settings": {
             "flowFile": "ficheros.json",
