@@ -206,7 +206,7 @@
         "z": "aa6a33acd4decab3",
         "name": "File Browser",
         "info": "1) Update the default folder in the Init node\n2) Update the default folder in the Reset node as well\n3) You can duplicate the Reset nodes and use them as saved shortcuts\n4) Check the Convert Timestamps function node if you want to see your dates in a different format. I just used the Javascript toISOString format.\n5) The Graph button can read any CSV file which have any number of values, but the first column always contains a timestamp column with javascript timestamp of the data point.",
-        "x": 210,
+        "x": 250,
         "y": 80,
         "wires": []
     },
@@ -215,7 +215,7 @@
         "type": "fs-file-lister",
         "z": "aa6a33acd4decab3",
         "name": "Files",
-        "start": "C:\\",
+        "start": "/",
         "pattern": "*.*",
         "folders": "*",
         "hidden": false,
@@ -225,7 +225,7 @@
         "depth": 0,
         "stat": true,
         "showWarnings": false,
-        "x": 610,
+        "x": 650,
         "y": 180,
         "wires": [
             [
@@ -253,9 +253,9 @@
         "once": true,
         "onceDelay": 0.1,
         "topic": "change",
-        "payload": "C:\\Users",
+        "payload": "/",
         "payloadType": "str",
-        "x": 210,
+        "x": 250,
         "y": 140,
         "wires": [
             [
@@ -282,7 +282,7 @@
         "payloadType": "str",
         "topic": "refresh",
         "topicType": "str",
-        "x": 200,
+        "x": 240,
         "y": 180,
         "wires": [
             [
@@ -314,7 +314,7 @@
         "payload": "",
         "topic": "",
         "topicType": "str",
-        "x": 1010,
+        "x": 1050,
         "y": 180,
         "wires": [
             [
@@ -330,7 +330,7 @@
         "func": "// format the data for the dropdown\nmsg.options = [];\nfor (var i=0; i<msg.payload.length; i++) {\n    // This is a file\n    obj = {};\n    obj [msg.payload[i].name.replace(/^.*(\\\\|\\/|\\:)/, '')]=msg.payload[i].name;\n    msg.options.push(obj);\n}\nmsg.payload={};\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 810,
+        "x": 850,
         "y": 180,
         "wires": [
             [
@@ -351,7 +351,7 @@
         "storeOutMessages": true,
         "fwdInMessages": true,
         "templateScope": "local",
-        "x": 1200,
+        "x": 1240,
         "y": 240,
         "wires": [
             []
@@ -368,7 +368,7 @@
         "syntax": "mustache",
         "template": "<table width=\"100%\">\n    <tr><th>File Name</th><th>Size</th><th>Created</th><th>Changed</th></tr>\n    {{#payload}}\n        <tr>\n            <td><a href=\"/download?filename={{name}}\" target=\"blank\">{{fname}}</a></td>\n            <td>{{stat.size}}</td>\n            <td>{{stat.created}}</td>\n            <td>{{stat.changed}}</td>\n        </tr>\n    {{/payload}}\n</table>\n",
         "output": "str",
-        "x": 1040,
+        "x": 1080,
         "y": 240,
         "wires": [
             [
@@ -384,7 +384,7 @@
         "func": "for (var i=0; i<msg.payload.length; i++) {\n    msg.payload[i].stat.created = msg.payload[i].stat.created.toISOString().slice(0, 19).replace('T', ' ');\n    msg.payload[i].stat.changed = msg.payload[i].stat.changed.toISOString().slice(0, 19).replace('T', ' ');\n    msg.payload[i].stat.accessed = msg.payload[i].stat.accessed.toISOString().slice(0, 19).replace('T', ' ');\n    msg.payload[i].stat.statusChanged = msg.payload[i].stat.statusChanged.toISOString().slice(0, 19).replace('T', ' ');\n    msg.payload[i].fname = msg.payload[i].name.replace(/^.*(\\\\|\\/|\\:)/, '');\n}\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 840,
+        "x": 880,
         "y": 240,
         "wires": [
             [
@@ -504,19 +504,20 @@
         "type": "function",
         "z": "aa6a33acd4decab3",
         "name": "Folder handling",
-        "func": "let folder = context.get(\"folder\");\nif (folder===undefined) {\n    folder =\"C:\\\\Users\";\n    context.set(\"folder\", folder);\n}\n\nlet hidden = context.get(\"hidden\");\nif (hidden===undefined) {\n    hidden=false;\n    context.set(\"hidden\", hidden);\n}\n\nif (msg.topic===\"up\") {\n    var the_arr = folder.split('\\\\');\n    the_arr.pop();\n    folder=the_arr.join('\\\\'); \n    context.set(\"folder\", folder);\n}\nif (msg.topic===\"change\") {\n    folder=msg.payload;    \n    context.set(\"folder\", folder);\n}\nif (msg.topic===\"hidden\") {\n    hidden=msg.payload;    \n    context.set(\"hidden\", hidden);\n}\nif (folder===\"C:\") {\n    folder =\"C:\\\\Users\";\n    context.set(\"folder\", folder);\n}\n\nmsg.payload = {\"start\":folder, \"hidden\": hidden};\nreturn msg;",
+        "func": "let folder = context.get(\"folder\");\n\nif (folder===undefined) {\n    folder =\"/\";\n    context.set(\"folder\", folder);\n}\n\nlet hidden = context.get(\"hidden\");\nif (hidden===undefined) {\n    hidden=false;\n    context.set(\"hidden\", hidden);\n}\n\nif (msg.topic===\"up\") {\n    var the_arr = folder.split('/');\n    \n    the_arr.pop();\n   \n    folder=the_arr.join('/');\n    if (folder===\"\"){\n\n        folder=\"/\";\n    }\n    node.warn(folder);\n    context.set(\"folder\", folder);\n}\nif (msg.topic===\"change\") {\n    folder=msg.payload;    \n    context.set(\"folder\", folder);\n}\nif (msg.topic===\"hidden\") {\n    hidden=msg.payload;    \n    context.set(\"hidden\", hidden);\n}\nif (folder ===\"C:\\Users\") {\n    folder =\"C:\";\n    context.set(\"folder\", folder);\n}\n\nmsg.payload = {\"start\":folder, \"hidden\": hidden};\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 400,
+        "x": 440,
         "y": 240,
         "wires": [
             [
                 "fc785b227126e342",
                 "103e3f897b39b4a5",
-                "4a6690ad01f9defc"
+                "4a6690ad01f9defc",
+                "4614914acc7ba9f8"
             ]
         ]
     },
@@ -532,7 +533,7 @@
         "label": "Folder:",
         "format": "{{msg.payload.start}}",
         "layout": "row-left",
-        "x": 600,
+        "x": 640,
         "y": 120,
         "wires": []
     },
@@ -554,7 +555,7 @@
         "payload": "",
         "payloadType": "str",
         "topic": "up",
-        "x": 210,
+        "x": 250,
         "y": 260,
         "wires": [
             [
@@ -622,12 +623,13 @@
         "tooltip": "",
         "color": "",
         "bgcolor": "",
+        "className": "",
         "icon": "autorenew",
-        "payload": "C:\\Users",
+        "payload": "/",
         "payloadType": "str",
         "topic": "change",
         "topicType": "str",
-        "x": 210,
+        "x": 250,
         "y": 220,
         "wires": [
             [
@@ -640,7 +642,7 @@
         "type": "fs-file-lister",
         "z": "aa6a33acd4decab3",
         "name": "Folders",
-        "start": "C:\\User",
+        "start": "/",
         "pattern": "*.*",
         "folders": "*",
         "hidden": false,
@@ -650,12 +652,11 @@
         "depth": 0,
         "stat": true,
         "showWarnings": false,
-        "x": 620,
+        "x": 660,
         "y": 280,
         "wires": [
             [
-                "f561d7f450a3c018",
-                "4614914acc7ba9f8"
+                "f561d7f450a3c018"
             ]
         ]
     },
@@ -683,7 +684,7 @@
         "payload": "",
         "topic": "",
         "topicType": "str",
-        "x": 1020,
+        "x": 1060,
         "y": 280,
         "wires": [
             [
@@ -699,7 +700,7 @@
         "func": "// format the data for the dropdown\nmsg.options = [];\nfor (var i=0; i<msg.payload.length; i++) {\n    // This is a foler\n    obj = {};\n    obj [\"[\"+msg.payload[i].name.replace(/^.*(\\\\|\\/|\\:)/, '')+\"]\"]=msg.payload[i].name;\n    msg.options.push(obj);\n}\nmsg.payload={};\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 810,
+        "x": 850,
         "y": 280,
         "wires": [
             [
@@ -726,7 +727,7 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1220,
+        "x": 1260,
         "y": 180,
         "wires": [
             []
@@ -751,7 +752,7 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1220,
+        "x": 1260,
         "y": 280,
         "wires": [
             []
@@ -780,7 +781,7 @@
         "offvalueType": "bool",
         "officon": "check_box_outline_blank",
         "offcolor": "#000000",
-        "x": 200,
+        "x": 240,
         "y": 300,
         "wires": [
             [
@@ -1041,15 +1042,15 @@
         "type": "debug",
         "z": "aa6a33acd4decab3",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 880,
-        "y": 380,
+        "x": 850,
+        "y": 100,
         "wires": []
     }
 ]
